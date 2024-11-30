@@ -4,6 +4,9 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
+app.use(express.json());
+app.use(cors());
+
 const uri =
   "mongodb+srv://diptafakibaj:EGbrTlLckHobgRPz@cluster0.i53p4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
@@ -19,24 +22,31 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
-    fetch();
+    // const database = client.db("userDB");
+    // const userCollection = database.collection("users");
+
+    const userCollection = client.db("userDB").collection("users");
+
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      console.log("New user:", user);
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
-
-app.use(express.json());
-app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("server executes....");
